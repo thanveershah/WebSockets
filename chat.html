@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Chat</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <form id="form" autocomplete="off" id="chat_form">
+      <input id="chat_input" type="text" />
+    </form> -->
+    <!-- <p></p> -->
+    <!-- <div id="future"></div> -->
+
+    <div class="container">
+      <div
+        class="row align-self-center align-items-center"
+        style="height:500px"
+      >
+        <div class="col-12 text-center ">
+          <h3 class="mb-5" style="color:white">
+            Create A Name To Enter The Chat Room!
+          </h3>
+          <div class="d-flex justify-content-center" id="test">
+            <div class="form-group">
+              <input
+                id="name"
+                class="form-control"
+                type="text"
+                name="name"
+                placeholder="Enter your name"
+                autocomplete="off"
+              />
+            </div>
+            <div class="form-group">
+              <button
+                type="button"
+                class="btn btn-success ml-3"
+                style="color:white"
+                name="button"
+                onclick="setUsername()"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+          <div id="error-container" style="color:red"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center">
+      <p style="color:white">
+        Thanveer Shah v1 - Developed using Node , Express , Socket.io , Push
+        Notification (Desktop)
+      </p>
+    </footer>
+
+    <script>
+      var socket = io.connect("http://shahchat.herokuapp.com/", { port: 5000 });
+
+      //Send Message
+      const sendMessage = () => {
+        var msg = document.getElementById("message").value;
+        if (msg) {
+          socket.emit("msg", { message: msg, user: user });
+        }
+        document.getElementById("message").value = "";
+      };
+
+      //Recieve Message
+      socket.on("newmsg", data => {
+        var pos = {
+          lat: data.user,
+          lng: data.message
+        };
+        console.log(pos);
+
+        infoWindow.setPosition(pos);
+        infoWindow.setContent("|");
+        infoWindow.open(map);
+        map.setCenter(pos);
+      });
+
+      socket.on("joined", data => {
+        document.getElementById("namePerson").innerHTML +=
+          data + " has joined" + "<br />";
+      });
+
+      socket.on("left", data => {
+        document.getElementById("namePerson").innerHTML += data + "<br />";
+      });
+
+      socket.on("userSet", data => {
+        user = data.username;
+        document.body.innerHTML = ' <div id="map"></div>';
+        setTimeout(() => {
+          initMap();
+        }, 5000);
+      });
+
+      var map;
+      var infoWindow;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: -34.397, lng: 150.644 },
+          zoom: 15
+        });
+
+        infoWindow = new google.maps.InfoWindow();
+      }
+
+      const setUsername = () => {
+        socket.emit("setUsername", document.getElementById("name").value);
+      };
+      var user;
+
+      socket.on("userExists", data => {
+        document.getElementById("error-container").innerHTML = data;
+      });
+    </script>
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYeM-61izRddl_7x0teH8C7g5gf3e4FfM&callback=initMap"
+    ></script>
+  </body>
+</html>
